@@ -73,7 +73,7 @@ class Lines {
 	}
 }
 
-class Line {
+/*class Line {
 	constructor(start, end) {
 		const {globe} = config.sizes;
 		const {markers} = config.scale;
@@ -105,7 +105,49 @@ class Line {
 		);
 
 		return new THREE.CubicBezierCurve3(start, mid1, mid2, end)
-	}
+	}*/
+
+
+class Line {
+    constructor(start, end) {
+        const {globe} = config.sizes;
+        const {markers} = config.scale;
+
+        const portugal = getCountry('Portugal', data.countries); // obtém coordenadas de Portugal
+
+        // Sempre começa de Portugal
+        this.start = portugal;
+        this.end = end;
+
+        this.radius = globe + globe * markers;
+
+        this.curve = this.createCurve();
+
+        this.geometry = new THREE.Geometry();
+        this.geometry.vertices = this.curve.getPoints(200);
+        this.material = this.createMaterial();
+
+        this.line = new MeshLine();
+        this.line.setGeometry(this.geometry);
+
+        this.mesh = new THREE.Mesh(this.line.geometry, this.material);
+        this.mesh._path = this.geometry.vertices;
+    }
+
+    createCurve() {
+        const {start, end, mid1, mid2} = getSplineFromCoords(
+            this.start.latitude,
+            this.start.longitude,
+            this.end.latitude,
+            this.end.longitude,
+            this.radius
+        );
+
+        return new THREE.CubicBezierCurve3(start, mid1, mid2, end);
+    }
+
+
+
 
 	createMaterial() {
 		return new MeshLineMaterial({
